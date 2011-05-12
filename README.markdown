@@ -7,7 +7,7 @@ It wraps logic that can catch any errors or exception even parse or fatal ones.
 
 ## Example
 
-    $handler = new UniversalErrorHandler(function(Exception $e) {
+    $handler = new UniversalErrorHandler_Handler(function(Exception $e) {
       $to = 'admin@foo-comapny.com';
       $subject = 'An error has appeared.';
       $body = 'The error `'.$e->getMessage().'` in file `'.$e->getFile().'` on line `'.$e->getLine().'`';
