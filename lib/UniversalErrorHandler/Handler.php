@@ -15,21 +15,42 @@ class UniversalErrorHandler_Handler
      *
      * @var mixed
      */
-    protected $callback;
+    protected $callbacks = array();
     
     /**
      *
-     * @param mixed $callbale a valid callback
+     * @param mixed $callback
      * 
      * @throws InvalidArgumentException if invalid callback provided
+     * 
+     * @return UniversalErrorHandler_Handler 
      */
-    public function __construct($callback) 
+    public function registerCallback($callback)
     {
         if (!is_callable($callback)) {
             throw new InvalidArgumentException('Invalid callback provided.');
         }
         
-        $this->callback = $callback;
+        $this->callbacks[] = $callback;
+        
+        return $this;
+    }
+    
+    /**
+     *
+     * @param mixed $callbackToUnregister
+     * 
+     * @return UniversalErrorHandler_Handler 
+     */
+    public function unregisterCallback($callbackToUnregister)
+    {
+        foreach ($this->callbacks as $key => $callback) {
+            if ($callbackToUnregister == $callback) {
+                unset($this->callbacks[$key]);
+            }
+        }
+        
+        return $this;
     }
   
     /**
@@ -56,7 +77,13 @@ class UniversalErrorHandler_Handler
     */
     public function handleException(Exception $e)
     {
-        call_user_func_array($this->callback, array($e));
+        foreach ($this->callbacks as $callback) {
+            $isProcessed = call_user_func_array($callback, array($e));
+            
+            if (true === $isProcessed) {
+                break;
+            }
+        }
     }
 
     /**
