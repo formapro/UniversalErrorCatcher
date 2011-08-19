@@ -19,6 +19,12 @@ class UniversalErrorCatcher_Catcher
      * @var mixed
      */
     protected $callbacks = array();
+
+    /**
+     *
+     * @var boolean
+     */
+    protected $isStarted = false;
     
     /**
      *
@@ -62,6 +68,8 @@ class UniversalErrorCatcher_Catcher
      */
     public function start()
     {
+        if ($this->isStarted) return;
+
         $this->memoryReserv = str_repeat('x', 1024 * 500);
 
         // it needs to be done to find out whether the error comes from the ordinary code or it is under @
@@ -71,6 +79,8 @@ class UniversalErrorCatcher_Catcher
         set_error_handler(array($this, 'handleError'));
         register_shutdown_function(array($this, 'handleFatalError'));
         set_exception_handler(array($this, 'handleException'));
+
+        $this->isStarted = true;
     }
 
     /**
@@ -108,17 +118,28 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleFatalError()
     {
-        $error = error_get_last();
+        $error = $this->getFatalError();
 
         $skipHandling = 
           !$error || 
           !isset($error['type']) || 
-          !in_array($error['type'], UniversalErrorHandler_ErrorCode::getFatals());
+          !in_array($error['type'], UniversalErrorCatcher_ErrorCode::getFatals());
         if ($skipHandling) return;
 
         $this->freeMemory();
 
         @$this->handleError($error['type'], $error['message'], $error['file'], $error['line']);
+    }
+
+    /**
+     *
+     * It is done for testing purpose
+     *
+     * @return array
+     */
+    protected function getFatalError()
+    {
+        return error_get_last();
     }
 
     /**
