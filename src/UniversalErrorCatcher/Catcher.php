@@ -1,9 +1,12 @@
-<?php 
+<?php
 
-/** 
+require_once 'ErrorCode.php';
+
+/**
+ * 
  * @author Kotlyar Maksim kotlyar.maksim@gmail.com
  */
-class UniversalErrorHandler_Handler
+class UniversalErrorCatcher_Catcher
 {
    /**
     * 
@@ -54,47 +57,44 @@ class UniversalErrorHandler_Handler
     }
   
     /**
-    * 
-    * @return void
-    */
+     *
+     * @return void
+     */
     public function start()
     {
         $this->memoryReserv = str_repeat('x', 1024 * 500);
 
-        // Register error handler it will process the most part of erros (but not all)
-        set_error_handler(array($this, 'handleError'));
-        // Register shutdown handler it will process the rest part of errors
-        register_shutdown_function(array($this, 'handleFatalError'));
+        // it needs to be done to find out whether the error comes from the ordinary code or it is under @
+        // it could be any less zero values
+        0 == error_reporting() &&  @error_reporting(-1);
 
+        set_error_handler(array($this, 'handleError'));
+        register_shutdown_function(array($this, 'handleFatalError'));
         set_exception_handler(array($this, 'handleException'));
     }
 
     /**
-    * 
-    * @param Exception $e
-    * 
-    * @return void
-    */
+     *
+     * @param Exception $e
+     *
+     * @return void
+     */
     public function handleException(Exception $e)
     {
         foreach ($this->callbacks as $callback) {
-            $isProcessed = call_user_func_array($callback, array($e));
-            
-            if (true === $isProcessed) {
-                break;
-            }
+            call_user_func_array($callback, array($e));
         }
     }
 
     /**
-    * 
-    * @param string $errno
-    * @param string $errstr
-    * @param string $errfile
-    * @param string $errline
-    * 
-    * @return ErrorException
-    */
+     *
+     * @param string $errno
+     * @param string $errstr
+     * @param string $errfile
+     * @param string $errline
+     *
+     * @return ErrorException
+     */
     public function handleError($errno, $errstr, $errfile, $errline)
     {
         $this->handleException(new ErrorException($errstr, 0, $errno, $errfile, $errline));
@@ -103,9 +103,9 @@ class UniversalErrorHandler_Handler
     }
 
     /**
-    * 
-    * @return void
-    */
+     *
+     * @return void
+     */
     public function handleFatalError()
     {
         $error = error_get_last();
@@ -122,9 +122,9 @@ class UniversalErrorHandler_Handler
     }
 
     /**
-    * 
-    * @return void
-    */
+     *
+     * @return void
+     */
     protected function freeMemory()
     {
         unset($this->memoryReserv);

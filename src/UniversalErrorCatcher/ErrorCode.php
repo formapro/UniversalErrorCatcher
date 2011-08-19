@@ -4,7 +4,7 @@
  * 
  * @author     Maksim Kotlyar <mkotlar@ukr.net>
  */
-abstract class UniversalErrorHandler_ErrorCode
+abstract class UniversalErrorCatcher_ErrorCode
 { 
   const 
     E_ERROR = E_ERROR,
