@@ -36,3 +36,5 @@ Register callbacks:
     });
 
     $handler->start();
+
+The library is completely covered by phpunit tests.
