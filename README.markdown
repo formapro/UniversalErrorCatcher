@@ -1,17 +1,17 @@
 
-#universal-error-handler
+#universal-error-catcher
 
 ## Overview
 
-It wraps logic that can catch any errors or exception even parse or fatal ones.
+It wraps errors and exception handling logic. Any errors or exception even parse or fatal ones process the same and passed to you as exception.
 
 ## Example
 
-You can send email with error message:
+The most common way is to send an email to admin:
 
-    $handler = new UniversalErrorHandler_Handler();
+    $catcher = new UniversalErrorHandler_Catcher();
 
-    $handler->registerCallback(function(Exception $e) {
+    $catcher->registerCallback(function(Exception $e) {
       $to = 'admin@foo-comapny.com';
       $subject = 'An error has appeared.';
       $body = 'The error `'.$e->getMessage().'` in file `'.$e->getFile().'` on line `'.$e->getLine().'`';
@@ -21,35 +21,18 @@ You can send email with error message:
 
     $handler->start();
 
-    // after the start method is called all exceptions and php errors will be caught.
-    // php errors will be converted to ErrorException
+    // after the start method is called everything is under your control.
 
-Or define several callbacks function:
-
-    $handler = new UniversalErrorHandler_Handler();
-
-    $handler->registerCallback(function(Exception $e) {
-      // do some stuff
-    });
-
-    $handler->registerCallback(function(Exception $e) {
-      // do some other stuff
-    });
-
-    $handler->start();
-
-Also it is posible to brake the callback chain by returning true from  a callback.
+Register callbacks:
 
     $handler = new UniversalErrorHandler_Handler();
 
     $handler->registerCallback(function(Exception $e) {
       // do some stuff
-
-      return true;
     });
 
     $handler->registerCallback(function(Exception $e) {
-      // this will never called
+      // do some extra stuff
     });
 
     $handler->start();
