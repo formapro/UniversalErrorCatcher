@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__.'/../../../../src/UniversalErrorCatcher/Catcher.php';
+require_once __DIR__ . '/../../src/UniversalErrorCatcher.php';
 
-$catcher = new UniversalErrorCatcher_Catcher();
+$catcher = new UniversalErrorCatcher();
 
 $catcher->registerCallback(function(){
     echo "The error was catched\n\n\n";

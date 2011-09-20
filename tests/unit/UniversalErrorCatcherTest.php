@@ -4,7 +4,7 @@
  * 
  * @author Kotlyar Maksim kotlyar.maksim@gmail.com
  */
-class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
+class UniversalErrorCatcherTest extends PHPUnit_Framework_TestCase
 {
     /**
      *
@@ -15,7 +15,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldThrowIfInvalidCallbackProvided()
     {
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback('foo');
     }
 
@@ -27,7 +27,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
     {
         $callback = function() {};
 
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback($callback);
 
         $this->assertAttributeContains($callback, 'callbacks', $catcher);
@@ -44,7 +44,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $callbackOne = function() {};
         $callbackTwo = function() {};
 
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback($callbackOne);
         $catcher->registerCallback($callbackTwo);
 
@@ -64,7 +64,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $callbackOne = function() {};
         $callbackTwo = function() {};
 
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback($callbackOne);
         $catcher->registerCallback($callbackTwo);
 
@@ -94,7 +94,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             $checker->calledTwo = true;
         };
 
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback($callbackOne);
         $catcher->registerCallback($callbackTwo);
 
@@ -119,7 +119,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             $testcase->assertSame($expectedException, $actualException);
         };
 
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback($callback);
 
         $catcher->handleException($expectedException);
@@ -150,7 +150,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             $testcase->assertEquals($errorData['errline'], $actualException->getLine());
         };
 
-        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher = new UniversalErrorCatcher();
         $catcher->registerCallback($callback);
 
         $catcher->handleError($errorData['errno'], $errorData['errstr'], $errorData['errfile'], $errorData['errline']);
@@ -164,7 +164,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldNotRunCallbackOnCorrectShutdown()
     {
-        $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
+        $catcher = $this->getMock('UniversalErrorCatcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue(false));
 
         $checker = new stdClass();
@@ -196,10 +196,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             'file' => 'bar.php',
             'line' => 100);
 
-        //guard
-        $this->assertNotContains($fatalData['type'], UniversalErrorCatcher_ErrorCode::getFatals());
-
-        $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
+        $catcher = $this->getMock('UniversalErrorCatcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
 
         $checker = new stdClass();
@@ -231,11 +228,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             'file' => 'bar.php',
             'line' => 100);
 
-        //guard
-
-        $this->assertContains($fatalData['type'], UniversalErrorCatcher_ErrorCode::getFatals());
-
-        $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
+        $catcher = $this->getMock('UniversalErrorCatcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
 
         $checker = new stdClass();
@@ -251,5 +244,20 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $catcher->handleFatalError();
 
         $this->assertTrue($checker->called);
+    }
+
+    public function shouldAllowToEnableCatching()
+    {
+        $catcher = $this->getMock('UniversalErrorCatcher', array('start'));
+
+        $checker = new stdClass();
+        $checker->called = false;
+
+        $testcase = $this;
+        $callback = function() use($testcase, $checker) {
+            $testcase->called = false;
+        };
+
+
     }
 }
