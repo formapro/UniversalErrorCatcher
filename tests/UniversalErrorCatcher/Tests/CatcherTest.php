@@ -252,4 +252,31 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue($checker->called);
     }
+
+    /**
+     * 
+     * @test 
+     */
+    public function shouldAllowToDefineWhetherToThrowRecoverableErrorAsExceptionOrNot()
+    {
+        $catcher = new UniversalErrorCatcher_Catcher();
+
+        $catcher->setThrowRecoverableErrors(true);
+    }
+
+    /**
+     *
+     * @test
+     *
+     * @expectedException ErrorException
+     * @expectedExceptionMessage A recoverable error has happened
+     */
+    public function shoulThrowRecoverableErrorIfCatherConfiguredThisWay()
+    {
+        $catcher = new UniversalErrorCatcher_Catcher();
+
+        $catcher->setThrowRecoverableErrors(true);
+
+        $catcher->handleError(E_NOTICE, 'A recoverable error has happened', __FILE__, __LINE__);
+    }
 }
