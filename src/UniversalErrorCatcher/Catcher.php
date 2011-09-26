@@ -119,6 +119,7 @@ class UniversalErrorCatcher_Catcher
 
         $this->handleException($exception);
 
+        // @TODO make  this make this behavior configurable
         return false;
     }
 
