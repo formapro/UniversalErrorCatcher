@@ -196,9 +196,6 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             'file' => 'bar.php',
             'line' => 100);
 
-        //guard
-        $this->assertNotContains($fatalData['type'], UniversalErrorCatcher_ErrorCode::getFatals());
-
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
 
@@ -230,10 +227,6 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
             'message' => 10,
             'file' => 'bar.php',
             'line' => 100);
-
-        //guard
-
-        $this->assertContains($fatalData['type'], UniversalErrorCatcher_ErrorCode::getFatals());
 
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));

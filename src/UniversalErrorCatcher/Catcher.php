@@ -1,7 +1,5 @@
 <?php
 
-require_once 'ErrorCode.php';
-
 /**
  * 
  * @author Kotlyar Maksim kotlyar.maksim@gmail.com
@@ -118,17 +116,15 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleFatalError()
     {
+        $fatals = array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR);
+        
         $error = $this->getFatalError();
+        if ($error && isset($error['type']) && in_array($error['type'], $fatals)) {
 
-        $skipHandling = 
-          !$error || 
-          !isset($error['type']) || 
-          !in_array($error['type'], UniversalErrorCatcher_ErrorCode::getFatals());
-        if ($skipHandling) return;
+            $this->freeMemory();
 
-        $this->freeMemory();
-
-        @$this->handleError($error['type'], $error['message'], $error['file'], $error['line']);
+            @$this->handleError($error['type'], $error['message'], $error['file'], $error['line']);
+        }
     }
 
     /**
