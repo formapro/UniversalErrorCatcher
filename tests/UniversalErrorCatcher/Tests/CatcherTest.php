@@ -264,12 +264,31 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      * @expectedException ErrorException
      * @expectedExceptionMessage A recoverable error has happened
      */
-    public function shoulThrowRecoverableErrorIfCatherConfiguredThisWay()
+    public function shouldThrowRecoverableErrorIfCatherConfiguredThisWay()
     {
         $catcher = new UniversalErrorCatcher_Catcher();
 
         $catcher->setThrowRecoverableErrors(true);
 
         $catcher->handleError(E_NOTICE, 'A recoverable error has happened', __FILE__, __LINE__);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function shouldNotThrowFatalErrorIfCatherConfiguredThisWay()
+    {
+        $fatalData = array(
+            'type' => E_ERROR,
+            'message' => 10,
+            'file' => 'bar.php',
+            'line' => 100);
+
+        $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
+        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
+        $catcher->setThrowRecoverableErrors(true);
+
+        $catcher->handleFatalError();
     }
 }
