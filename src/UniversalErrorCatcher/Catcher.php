@@ -23,6 +23,13 @@ class UniversalErrorCatcher_Catcher
      * @var boolean
      */
     protected $isStarted = false;
+
+    protected $throwRecoverableErrors = false;
+
+    public function setThrowRecoverableErrors($boolean)
+    {
+        $this->throwRecoverableErrors = (boolean) $boolean;
+    }
     
     /**
      *
@@ -105,8 +112,14 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleError($errno, $errstr, $errfile, $errline)
     {
-        $this->handleException(new ErrorException($errstr, 0, $errno, $errfile, $errline));
+        $exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        if ($this->throwRecoverableErrors) {
+            throw $exception;
+        }
 
+        $this->handleException($exception);
+
+        // @TODO make this behavior configurable
         return false;
     }
 
@@ -120,10 +133,11 @@ class UniversalErrorCatcher_Catcher
         
         $error = $this->getFatalError();
         if ($error && isset($error['type']) && in_array($error['type'], $fatals)) {
-
+            
             $this->freeMemory();
 
-            @$this->handleError($error['type'], $error['message'], $error['file'], $error['line']);
+            $fatalException = new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
+            @$this->handleException($fatalException);
         }
     }
 
