@@ -43,6 +43,6 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
 
     protected function assertExecResultContainsError($result)
     {
-        $this->assertContains('The error was catched', $result, $result);
+        $this->assertContains('The error was caught', $result, $result);
     }
 }
