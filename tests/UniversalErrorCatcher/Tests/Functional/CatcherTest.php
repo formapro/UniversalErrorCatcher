@@ -13,6 +13,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
             array('scripts/parse.php'),
             array('scripts/fatal.php'),
             array('scripts/fatal_memory_limit.php'),
+            array('scripts/error_in_to_string.php'),
             array('scripts/exception.php')
         );
     }
@@ -25,19 +26,32 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
      */
     public function shouldCatchErrorInBuggyScript($errorScript)
     {
-        $r = $this->execBuggyScript($errorScript);
+        $r = $this->exec("php runner.php $errorScript 2> /dev/null");
 
         $this->assertExecResultContainsError($r);
     }
 
-    protected function execBuggyScript($errorFile)
+    /**
+     *
+     * @test
+     *
+     * @dataProvider provideBuggyScripts
+     */
+    public function shouldCatchErrorInBuggyScriptWithErrorThrowing($errorScript)
+    {
+        $r = $this->exec("php runner_throw_errors.php $errorScript 2> /dev/null");
+
+        $this->assertExecResultContainsError($r);
+    }
+
+    protected function exec($command)
     {
         chdir(__DIR__);
         $exitCode = 0;
         $result = array();
 
-        exec("php runner.php $errorFile 2> /dev/null", $result, $exitCode);
-        
+        exec($command, $result, $exitCode);
+
         return implode("\n", $result);
     }
 
