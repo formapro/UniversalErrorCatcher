@@ -113,7 +113,20 @@ class UniversalErrorCatcher_Catcher
     public function handleError($errno, $errstr, $errfile, $errline)
     {
         $exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
+
+        // it is not possible to throw an exception from __toString method.
+        $isErrorInToStringMethod = false;
         if ($this->throwRecoverableErrors) {
+            $trace = debug_backtrace(false);
+            array_shift($trace);
+            foreach ($trace as $frame) {
+                if ($frame['function'] == '__toString') {
+                    $isErrorInToStringMethod = true;
+                }
+            }
+        }
+
+        if ($this->throwRecoverableErrors && false == $isErrorInToStringMethod) {
             throw $exception;
         }
 
