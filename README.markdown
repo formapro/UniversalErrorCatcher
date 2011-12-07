@@ -3,13 +3,13 @@
 
 ## Overview
 
-It wraps errors and exception handling logic. Any errors or exception even parse or fatal ones process the same and passed to you as exception.
+It wraps errors and exception handling logic. Any exception or errors even parse and fatal ones are handled in the same way and passed to you as exception.
 
 ## Example
 
 The most common way is to send an email to admin:
 
-    $catcher = new UniversalErrorHandler_Catcher();
+    $catcher = new UniversalErrorCatcher_Catcher();
 
     $catcher->registerCallback(function(Exception $e) {
       $to = 'admin@foo-comapny.com';
@@ -19,22 +19,22 @@ The most common way is to send an email to admin:
       mail($to, $subject, $body);
     });
 
-    $handler->start();
+    $catcher->start();
 
     // after the start method is called everything is under your control.
 
 Register callbacks:
 
-    $handler = new UniversalErrorHandler_Handler();
+    $catcher = new UniversalErrorCatcher_Catcher();
 
-    $handler->registerCallback(function(Exception $e) {
+    $catcher->registerCallback(function(Exception $e) {
       // do some stuff
     });
 
-    $handler->registerCallback(function(Exception $e) {
+    $catcher->registerCallback(function(Exception $e) {
       // do some extra stuff
     });
 
-    $handler->start();
+    $catcher->start();
 
 The library is completely covered by phpunit tests.
