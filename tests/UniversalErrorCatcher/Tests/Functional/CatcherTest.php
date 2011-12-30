@@ -11,6 +11,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
         return array(
             array('scripts/notice.php'),
             array('scripts/parse.php'),
+            array('scripts/warning.php'),
             array('scripts/fatal.php'),
             array('scripts/fatal_memory_limit.php'),
             array('scripts/error_in_to_string.php'),

@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../../../../src/UniversalErrorCatcher/Catcher.php';
+require_once __DIR__.'/../../../../autoload.php';
 
 $catcher = new UniversalErrorCatcher_Catcher();
 
