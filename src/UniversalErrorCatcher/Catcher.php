@@ -142,14 +142,14 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleFatalError()
     {
-        $fatals = array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR);
+        $fatals = FatalErrorException::getFatalCodes();
         
         $error = $this->getFatalError();
         if ($error && isset($error['type']) && in_array($error['type'], $fatals)) {
             
             $this->freeMemory();
 
-            $fatalException = new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
+            $fatalException = new FatalErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
             @$this->handleException($fatalException);
         }
     }
