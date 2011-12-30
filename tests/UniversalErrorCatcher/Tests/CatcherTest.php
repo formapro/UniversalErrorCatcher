@@ -6,6 +6,27 @@
  */
 class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
 {
+    protected $errorData = array(
+        'errstr' => 'foo',
+        'errno' => 10,
+        'errfile' => 'bar.php',
+        'errline' => 100
+    );
+
+    protected $invalidFatalData = array(
+        'type' => 'foo',
+        'message' => 10,
+        'file' => 'bar.php',
+        'line' => 100
+    );
+
+    protected $fatalData = array(
+        'type' => E_ERROR,
+        'message' => 10,
+        'file' => 'bar.php',
+        'line' => 100
+    );
+
     /**
      *
      * @test
@@ -43,7 +64,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldAllowToRegisterCallback()
     {
-        $callback = 'mail';
+        $callback = array(new ____Callback, 'handle');
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback($callback);
@@ -59,17 +80,14 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldAllowToRegisterMultipleCallbacks()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
-        $callbackOne = function() {};
-        $callbackTwo = function() {};
+        $callbackOne = array(new ____Callback, 'handle');
+        $callbackTwo = array(new ____Callback, 'handle');
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback($callbackOne);
         $catcher->registerCallback($callbackTwo);
 
+        $this->assertAttributeCount(2, 'callbacks', $catcher);
         $this->assertAttributeContains($callbackOne, 'callbacks', $catcher);
         $this->assertAttributeContains($callbackTwo, 'callbacks', $catcher);
     }
@@ -83,12 +101,8 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldAllowUnregisterCallback()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
-        $callbackOne = function() {};
-        $callbackTwo = function() {};
+        $callbackOne = array(new ____Callback, 'handle');
+        $callbackTwo = array(new ____Callback, 'handle');
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback($callbackOne);
@@ -96,8 +110,9 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
 
         $catcher->unregisterCallback($callbackTwo);
 
-        $this->assertAttributeContains($callbackOne, 'callbacks', $catcher);
-        $this->assertAttributeNotContains($callbackTwo, 'callbacks', $catcher);
+        $actualCallbacks = $this->readAttribute($catcher, 'callbacks');
+        $this->assertCount(1, $actualCallbacks);
+        $this->assertContains($callbackOne, $actualCallbacks);
     }
     
     /**
@@ -108,30 +123,17 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldRunAllCallbacksOnExceptionHandling()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
+        $callbackOne = $this->getMock('____Callback');
+        $callbackOne->expects($this->once())->method('handle');
 
-        $checker = new stdClass;
-        $checker->calledOne = false;
-        $checker->calledTwo = false;
-
-        $callbackOne = function() use($checker) {
-            $checker->calledOne = true;
-        };
-
-        $callbackTwo = function() use($checker) {
-            $checker->calledTwo = true;
-        };
+        $callbackTwo = $this->getMock('____Callback');
+        $callbackTwo->expects($this->once())->method('handle');
 
         $catcher = new UniversalErrorCatcher_Catcher();
-        $catcher->registerCallback($callbackOne);
-        $catcher->registerCallback($callbackTwo);
+        $catcher->registerCallback(array($callbackOne, 'handle'));
+        $catcher->registerCallback(array($callbackTwo, 'handle'));
 
         $catcher->handleException(new Exception('Foo'));
-
-        $this->assertTrue($checker->calledOne);
-        $this->assertTrue($checker->calledTwo);
     }
 
     /**
@@ -142,19 +144,17 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldPassExceptionToCallbackOnExceptionHandling()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
         $expectedException = new Exception('Foo');
-        $testcase = $this;
 
-        $callback = function($actualException) use($testcase, $expectedException) {
-            $testcase->assertSame($expectedException, $actualException);
-        };
+        $callback = $this->getMock('____Callback');
+        $callback
+            ->expects($this->once())
+            ->method('handle')
+            ->with($this->identicalTo($expectedException))
+        ;
 
         $catcher = new UniversalErrorCatcher_Catcher();
-        $catcher->registerCallback($callback);
+        $catcher->registerCallback(array($callback, 'handle'));
 
         $catcher->handleException($expectedException);
     }
@@ -167,31 +167,31 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldPassErrorExceptionToCallbackOnErrorHandling()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
+        $errorData = $this->errorData;
 
-        $errorData = array(
-            'errstr' => 'foo', 
-            'errno' => 10, 
-            'errfile' => 'bar.php', 
-            'errline' => 100);
-        $testcase = $this;
-
-        $callback = function($actualException) use($testcase, $errorData) {
-            $testcase->assertInstanceOf('ErrorException', $actualException);
-
-            $testcase->assertEquals($errorData['errstr'], $actualException->getMessage());
-            $testcase->assertEquals(0, $actualException->getCode());
-            $testcase->assertEquals($errorData['errno'], $actualException->getSeverity());
-            $testcase->assertEquals($errorData['errfile'], $actualException->getFile());
-            $testcase->assertEquals($errorData['errline'], $actualException->getLine());
-        };
+        $callback = $this->getMock('____Callback');
+        $callback
+            ->expects($this->once())
+            ->method('handle')
+            ->with($this->isInstanceOf('ErrorException'))
+            ->will($this->returnCallback(array($this, 'callbackForShouldPassErrorExceptionToCallbackOnErrorHandling')))
+        ;
 
         $catcher = new UniversalErrorCatcher_Catcher();
-        $catcher->registerCallback($callback);
+        $catcher->registerCallback(array($callback, 'handle'));
 
         $catcher->handleError($errorData['errno'], $errorData['errstr'], $errorData['errfile'], $errorData['errline']);
+    }
+
+    public function callbackForShouldPassErrorExceptionToCallbackOnErrorHandling($actualException)
+    {
+        $errorData = $this->errorData;
+
+        $this->assertEquals($errorData['errstr'], $actualException->getMessage());
+        $this->assertEquals(0, $actualException->getCode());
+        $this->assertEquals($errorData['errno'], $actualException->getSeverity());
+        $this->assertEquals($errorData['errfile'], $actualException->getFile());
+        $this->assertEquals($errorData['errline'], $actualException->getLine());
     }
 
     /**
@@ -202,26 +202,15 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldNotRunCallbackOnCorrectShutdown()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
+        $callback = $this->getMock('____Callback');
+        $callback->expects($this->never())->method('handle');
 
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue(false));
 
-        $checker = new stdClass();
-        $checker->nevercalled = true;
-        $testcase = $this;
-
-        $callback = function() use($testcase, $checker) {
-            $checker->nevercalled = false;
-        };
-
-        $catcher->registerCallback($callback);
+        $catcher->registerCallback(array($callback, 'handle'));
 
         $catcher->handleFatalError();
-
-        $this->assertTrue($checker->nevercalled);
     }
 
     /**
@@ -232,32 +221,15 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldNotRunCallbackOnNoFatalShutdown()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
-        $fatalData = array(
-            'type' => 'foo',
-            'message' => 10,
-            'file' => 'bar.php',
-            'line' => 100);
-
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
-        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
+        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($this->invalidFatalData));
 
-        $checker = new stdClass();
-        $checker->nevercalled = true;
-        $testcase = $this;
+        $callback = $this->getMock('____Callback');
+        $callback->expects($this->never())->method('handle');
 
-        $callback = function() use($checker) {
-            $checker->nevercalled = false;
-        };
-
-        $catcher->registerCallback($callback);
+        $catcher->registerCallback(array($callback, 'handle'));
 
         $catcher->handleFatalError();
-
-        $this->assertTrue($checker->nevercalled);
     }
 
     /**
@@ -268,31 +240,15 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldRunCallbackOnFatalShutdown()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
-        $fatalData = array(
-            'type' => E_ERROR,
-            'message' => 10,
-            'file' => 'bar.php',
-            'line' => 100);
-
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
-        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
+        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($this->fatalData));
 
-        $checker = new stdClass();
-        $checker->called = false;
+        $callback = $this->getMock('____Callback');
+        $callback->expects($this->once())->method('handle');
 
-        $callback = function() use($checker) {
-            $checker->called = true;
-        };
-
-        $catcher->registerCallback($callback);
+        $catcher->registerCallback(array($callback, 'handle'));
 
         $catcher->handleFatalError();
-
-        $this->assertTrue($checker->called);
     }
 
     /**
@@ -302,31 +258,19 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldRunCallbackOnFatalShutdownWithFatalErrorException()
     {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
-        $fatalData = array(
-            'type' => E_ERROR,
-            'message' => 10,
-            'file' => 'bar.php',
-            'line' => 100);
-
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
-        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($fatalData));
+        $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue($this->fatalData));
 
-        $checker = new stdClass();
-        $checker->exception = null;
+        $callback = $this->getMock('____Callback');
+        $callback
+            ->expects($this->atLeastOnce())
+            ->method('handle')
+            ->with($this->isInstanceOf('FatalErrorException'))
+        ;
 
-        $callback = function($exception) use($checker) {
-            $checker->exception = $exception;
-        };
-
-        $catcher->registerCallback($callback);
+        $catcher->registerCallback(array($callback, 'handle'));
 
         $catcher->handleFatalError();
-
-        $this->assertInstanceOf('FatalErrorException', $checker->exception);
     }
 
     /**
@@ -373,5 +317,13 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $catcher->setThrowRecoverableErrors(true);
 
         $catcher->handleFatalError();
+    }
+}
+
+class ____Callback
+{
+    public function handle()
+    {
+
     }
 }

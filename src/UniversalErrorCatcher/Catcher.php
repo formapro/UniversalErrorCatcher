@@ -59,7 +59,7 @@ class UniversalErrorCatcher_Catcher
     public function unregisterCallback($callbackToUnregister)
     {
         foreach ($this->callbacks as $key => $callback) {
-            if ($callbackToUnregister == $callback) {
+            if ($callbackToUnregister === $callback) {
                 unset($this->callbacks[$key]);
             }
         }
