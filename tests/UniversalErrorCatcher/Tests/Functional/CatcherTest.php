@@ -47,7 +47,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
 
     protected function exec($command)
     {
-        chdir(__DIR__);
+        chdir(dirname(__FILE__));
         $exitCode = 0;
         $result = array();
 
