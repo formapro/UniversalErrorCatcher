@@ -41,24 +41,6 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-         *
-         * @test
-         */
-    public function shouldAllowToRegisterClosureAsCallback()
-    {
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $this->markTestSkipped('Closure is not available before PHP 5.3');
-        }
-
-        $callback = function() {};
-
-        $catcher = new UniversalErrorCatcher_Catcher();
-        $catcher->registerCallback($callback);
-
-        $this->assertAttributeContains($callback, 'callbacks', $catcher);
-    }
-
-    /**
      *
      * @test
      */
