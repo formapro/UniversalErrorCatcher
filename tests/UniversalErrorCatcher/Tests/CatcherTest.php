@@ -20,12 +20,30 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+         *
+         * @test
+         */
+    public function shouldAllowToRegisterClosureAsCallback()
+    {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
+        $callback = function() {};
+
+        $catcher = new UniversalErrorCatcher_Catcher();
+        $catcher->registerCallback($callback);
+
+        $this->assertAttributeContains($callback, 'callbacks', $catcher);
+    }
+
+    /**
      *
      * @test
      */
     public function shouldAllowToRegisterCallback()
     {
-        $callback = function() {};
+        $callback = 'mail';
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback($callback);
@@ -41,6 +59,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldAllowToRegisterMultipleCallbacks()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $callbackOne = function() {};
         $callbackTwo = function() {};
 
@@ -61,6 +83,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldAllowUnregisterCallback()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $callbackOne = function() {};
         $callbackTwo = function() {};
 
@@ -82,6 +108,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldRunAllCallbacksOnExceptionHandling()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $checker = new stdClass;
         $checker->calledOne = false;
         $checker->calledTwo = false;
@@ -112,6 +142,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldPassExceptionToCallbackOnExceptionHandling()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $expectedException = new Exception('Foo');
         $testcase = $this;
 
@@ -133,6 +167,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldPassErrorExceptionToCallbackOnErrorHandling()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $errorData = array(
             'errstr' => 'foo', 
             'errno' => 10, 
@@ -164,6 +202,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldNotRunCallbackOnCorrectShutdown()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $catcher = $this->getMock('UniversalErrorCatcher_Catcher', array('getFatalError'));
         $catcher->expects($this->once())->method('getFatalError')->will($this->returnValue(false));
 
@@ -190,6 +232,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldNotRunCallbackOnNoFatalShutdown()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $fatalData = array(
             'type' => 'foo',
             'message' => 10,
@@ -222,6 +268,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldRunCallbackOnFatalShutdown()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $fatalData = array(
             'type' => E_ERROR,
             'message' => 10,
@@ -252,6 +302,10 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldRunCallbackOnFatalShutdownWithFatalErrorException()
     {
+        if (version_compare(PHP_VERSION, '5.3', '<')) {
+            $this->markTestSkipped('Closure is not available before PHP 5.3');
+        }
+
         $fatalData = array(
             'type' => E_ERROR,
             'message' => 10,
