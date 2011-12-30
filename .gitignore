@@ -2,3 +2,7 @@
 /.settings
 /.buildpath
 /.project
+.idea
+
+composer.*
+vendor

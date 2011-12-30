@@ -1,0 +1,21 @@
+{
+    "name": "fp/universal-error-catcher",
+    "type": "library",
+    "description": "Easy way to catch and handle all php errors and exceptions.",
+    "keywords": ["exception", "error"],
+    "homepage": "https://github.com/formapro/UniversalErrorCatcher",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vadim Tyukov",
+            "email": "brainreflex@gmail.com"
+        },
+        {
+            "name": "Maksim Kotlyar",
+            "email": "kotlyar.maksim@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.7"
+    }
+}
