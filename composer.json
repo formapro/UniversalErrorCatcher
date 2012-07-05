@@ -19,7 +19,7 @@
         "php": ">=5.2.7"
     },
     "autoload": {
-        "classmap": ["src"]
+        "classmap": ["./src"]
     },
     "extra": {
         "branch-alias": {
