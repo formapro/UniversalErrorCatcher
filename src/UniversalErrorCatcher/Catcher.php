@@ -112,6 +112,12 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleError($errno, $errstr, $errfile, $errline)
     {
+        // error reporting has been suppressed with a @
+        // and error belongs to run time non-fatal errors
+        if(false == error_reporting() && $errno == E_WARNING) {
+            return false;
+        }
+
         $exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
 
         // it is not possible to throw an exception from __toString method.
