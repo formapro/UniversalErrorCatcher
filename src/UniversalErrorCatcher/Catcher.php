@@ -1,17 +1,17 @@
 <?php
 
 /**
- * 
+ *
  * @author Kotlyar Maksim kotlyar.maksim@gmail.com
  */
 class UniversalErrorCatcher_Catcher
 {
-   /**
-    * 
-    * @var string
-    */
+    /**
+     *
+     * @var string
+     */
     protected $memoryReserv = '';
-    
+
     /**
      *
      * @var mixed
@@ -24,37 +24,56 @@ class UniversalErrorCatcher_Catcher
      */
     protected $isStarted = false;
 
+    /**
+     * @var bool
+     */
     protected $throwRecoverableErrors = false;
 
+    /**
+     * @var bool
+     */
+    protected $throwSuppressedErrors = false;
+
+    /**
+     * @param bool $boolean
+     */
     public function setThrowRecoverableErrors($boolean)
     {
         $this->throwRecoverableErrors = (boolean) $boolean;
     }
-    
+
+    /**
+     * @param bool $boolean
+     */
+    public function setThrowSuppressedErrors($boolean)
+    {
+        $this->throwSuppressedErrors = (boolean) $boolean;
+    }
+
     /**
      *
      * @param mixed $callback
-     * 
+     *
      * @throws InvalidArgumentException if invalid callback provided
-     * 
-     * @return UniversalErrorHandler_Handler 
+     *
+     * @return UniversalErrorHandler_Handler
      */
     public function registerCallback($callback)
     {
         if (!is_callable($callback)) {
             throw new InvalidArgumentException('Invalid callback provided.');
         }
-        
+
         $this->callbacks[] = $callback;
-        
+
         return $this;
     }
-    
+
     /**
      *
      * @param mixed $callbackToUnregister
-     * 
-     * @return UniversalErrorHandler_Handler 
+     *
+     * @return UniversalErrorHandler_Handler
      */
     public function unregisterCallback($callbackToUnregister)
     {
@@ -63,10 +82,10 @@ class UniversalErrorCatcher_Catcher
                 unset($this->callbacks[$key]);
             }
         }
-        
+
         return $this;
     }
-  
+
     /**
      *
      * @return void
@@ -112,27 +131,24 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleError($errno, $errstr, $errfile, $errline)
     {
-        // error reporting has been suppressed with a @
-        // and error belongs to run time non-fatal errors
-        if(false == error_reporting() && $errno == E_WARNING) {
-            return false;
+        $throwError = $this->throwRecoverableErrors;
+        if ($this->isSuppressedError() && false == $this->throwSuppressedErrors) {
+            $throwError = false;
         }
 
-        $exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
-
         // it is not possible to throw an exception from __toString method.
-        $isErrorInToStringMethod = false;
-        if ($this->throwRecoverableErrors) {
+        if ($throwError) {
             $trace = debug_backtrace(false);
             array_shift($trace);
             foreach ($trace as $frame) {
                 if ($frame['function'] == '__toString') {
-                    $isErrorInToStringMethod = true;
+                    $throwError = false;
                 }
             }
         }
 
-        if ($this->throwRecoverableErrors && false == $isErrorInToStringMethod) {
+        $exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        if ($throwError) {
             throw $exception;
         }
 
@@ -149,10 +165,10 @@ class UniversalErrorCatcher_Catcher
     public function handleFatalError()
     {
         $fatals = FatalErrorException::getFatalCodes();
-        
+
         $error = $this->getFatalError();
         if ($error && isset($error['type']) && in_array($error['type'], $fatals)) {
-            
+
             $this->freeMemory();
 
             $fatalException = new FatalErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
@@ -169,6 +185,14 @@ class UniversalErrorCatcher_Catcher
     protected function getFatalError()
     {
         return error_get_last();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isSuppressedError()
+    {
+        return 0 === error_reporting();
     }
 
     /**
