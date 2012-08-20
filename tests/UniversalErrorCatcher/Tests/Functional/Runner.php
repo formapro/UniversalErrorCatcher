@@ -11,4 +11,10 @@ $catcher = new UniversalErrorCatcher_Catcher();
 $catcher->registerCallback('__test_callback');
 $catcher->start();
 
-include $_SERVER['argv'][1];
+try {
+    include $_SERVER['argv'][1];
+} catch (SuppressedErrorException $e) {
+    echo "SuppressedErrorException was thrown";
+} catch (ErrorException $e) {
+    echo "ErrorException was thrown";
+}
