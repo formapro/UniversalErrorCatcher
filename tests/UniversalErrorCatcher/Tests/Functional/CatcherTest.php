@@ -6,28 +6,74 @@
  */
 class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framework_TestCase
 {
-    public static function provideBuggyScripts()
+
+    /**
+     * @var string
+     */
+    public static $scriptErrorInToString = 'scripts/ErrorInToString.php';
+
+    /**
+     * @var string
+     */
+    public static $scriptSuppressedWarning = 'scripts/SuppressedWarning.php';
+
+    /**
+     * @return array
+     */
+    public static function provideScriptsWithRecoverableErrors()
     {
         return array(
-            array('scripts/notice.php'),
-            array('scripts/parse.php'),
-            array('scripts/warning.php'),
-            array('scripts/fatal.php'),
-            array('scripts/fatal_memory_limit.php'),
-            array('scripts/error_in_to_string.php'),
-            array('scripts/exception.php'),
-            array('scripts/suppressedWarning.php'),
+            array('scripts/Notice.php'),
+            array('scripts/Warning.php'),
+            array(static::$scriptSuppressedWarning)
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public static function proviceScriptsWithFatalErrors()
+    {
+        return array(
+            array('scripts/Parse.php'),
+            array('scripts/Fatal.php'),
+            array('scripts/FatalMemoryLimit.php'),
+            array('scripts/Exception.php'),
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public static function provideAllBuggyScripts()
+    {
+        return array_merge(
+            static::provideScriptsWithRecoverableErrors(),
+            static::proviceScriptsWithFatalErrors(),
+            array(
+                array(static::$scriptErrorInToString)
+            )
         );
     }
 
     /**
      * @test
      *
-     * @dataProvider provideBuggyScripts
+     * @dataProvider provideAllBuggyScripts
      */
     public function shouldCatchErrorInBuggyScript($errorScript)
     {
-        $r = $this->exec("php runner.php $errorScript 2> /dev/null");
+        $r = $this->exec("php Runner.php $errorScript 2> /dev/null");
+
+        $this->assertExecResultContainsError($r);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldNotThrowErrorWithEnabledTrhowRecoverableErrorsIfInToStringErrorOccurred()
+    {
+        $r = $this->exec("php RunnerThrowErrors.php " . static::$scriptErrorInToString . " 2> /dev/null");
 
         $this->assertExecResultContainsError($r);
     }
@@ -35,13 +81,13 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
     /**
      * @test
      *
-     * @dataProvider provideBuggyScripts
+     * @dataProvider provideScriptsWithRecoverableErrors
      */
-    public function shouldCatchErrorInBuggyScriptWithErrorThrowing($errorScript)
+    public function shouldThrowErrorWithEnabledThrowRecoverableErrorsAndThrowSuppressedErrors($errorScript)
     {
-        $r = $this->exec("php runner_throw_errors.php $errorScript 2> /dev/null");
+        $r = $this->exec("php RunnerThrowErrors.php $errorScript 2> /dev/null");
 
-        $this->assertExecResultContainsError($r);
+        $this->assertErrorWasThrown($r);
     }
 
     /**
@@ -49,10 +95,9 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
      */
     public function shouldCatchErrorButNotThrowErrorWithEnabledThrowRecoverableErrorsAndDisabledThrowSuppressErrors()
     {
-        $r = $this->exec("php runner_does_not_throw_suppressed_errors.php scripts/suppressedWarning.php 2> /dev/null");
+        $r = $this->exec("php RunnerDoesNotThrowSuppressedErrors.php " . static::$scriptSuppressedWarning . " 2> /dev/null");
 
         $this->assertExecResultContainsError($r);
-        $this->assertExecResultNotContainsErrorException($r);
     }
 
     /**
@@ -60,10 +105,9 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
      */
     public function shouldThrowErrorOnRecoverableErrorsWithEnabledThrowRecoverableErrorsAndEnabledThrowSuppressErrors()
     {
-        $r = $this->exec("php runner_throw_suppressed_errors.php scripts/suppressedWarning.php 2> /dev/null");
+        $r = $this->exec("php RunnerThrowErrors.php " . static::$scriptSuppressedWarning . " 2> /dev/null");
 
-        $this->assertExecReseltNotContainsError($r);
-        $this->assertExecResultContainsErrorException($r);
+        $this->assertSuppressedErrorWasThrown($r);
     }
 
     protected function exec($command)
@@ -82,18 +126,13 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
         $this->assertContains('The error was caught', $result, $result);
     }
 
-    protected function assertExecReseltNotContainsError($result)
-    {
-        $this->assertNotContains("The error was caught", $result, $result);
-    }
-
-    protected function assertExecResultContainsErrorException($result)
+    protected function assertErrorWasThrown($result)
     {
         $this->assertContains("ErrorException was thrown", $result, $result);
     }
 
-    protected function assertExecResultNotContainsErrorException($result)
+    protected function assertSuppressedErrorWasThrown($result)
     {
-        $this->assertNotContains("ErrorException was thrown", $result, $result);
+        $this->assertContains("SuppressedErrorException was thrown", $result, $result);
     }
 }

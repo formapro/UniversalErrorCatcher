@@ -147,7 +147,11 @@ class UniversalErrorCatcher_Catcher
             }
         }
 
-        $exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        $exception = $this->isSuppressedError()
+            ? new SuppressedErrorException($errstr, 0, $errno, $errfile, $errline)
+            : new ErrorException($errstr, 0, $errno, $errfile, $errline)
+        ;
+
         if ($throwError) {
             throw $exception;
         }
