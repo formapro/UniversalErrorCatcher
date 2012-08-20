@@ -5,9 +5,9 @@
 It wraps errors and exception handling logic. Any exception or errors even parse and fatal ones are handled in the same way and passed to you as an exception.
 
 ## Exceptions
-`FatalErrorException` - fatal errors i.e. `E_ERROR`, `E_PARSE`, `E_CORE_ERROR`, `E_COMPILE_ERROR`
-`ErrorException` - recoverable errors i.e. `E_WARNING`, `E_USER_WARNING`, `E_NOTICE` etc
-`SuppressedErrorException` - recoverable errors which comes from the code under `@`
+* `FatalErrorException` - fatal errors i.e. `E_ERROR`, `E_PARSE`, `E_CORE_ERROR`, `E_COMPILE_ERROR`
+* `ErrorException` - recoverable errors i.e. `E_WARNING`, `E_USER_WARNING`, `E_NOTICE` etc
+* `SuppressedErrorException` - recoverable errors which comes from the code under `@`
 
 ## Examples
 
