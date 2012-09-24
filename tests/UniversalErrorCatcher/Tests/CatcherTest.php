@@ -313,11 +313,12 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $callbackWithException
             ->expects($this->at(0))
             ->method('handle')
+            ->with($handlingException)
             ->will($this->throwException($exceptionWhileHandleException))
         ;
 
-        $secondCallback = $this->getMock('stdClass', array('handle'));
-        $secondCallback
+        $successCallback = $this->getMock('stdClass', array('handle'));
+        $successCallback
             ->expects($this->at(0))
             ->method('handle')
             ->with($handlingException)
@@ -325,7 +326,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback(array($callbackWithException, 'handle'));
-        $catcher->registerCallback(array($secondCallback, 'handle'));
+        $catcher->registerCallback(array($successCallback, 'handle'));
 
         $catcher->handleException($handlingException);
     }
@@ -343,56 +344,59 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $firstCallbackWithException
             ->expects($this->at(0))
             ->method('handle')
+            ->with($handlingException)
             ->will($this->throwException($firstWhileHandleException))
         ;
         $firstCallbackWithException
             ->expects($this->at(1))
             ->method('handle')
-            ->will($this->throwException($firstWhileHandleException))
+            ->with($firstWhileHandleException)
         ;
         $firstCallbackWithException
             ->expects($this->at(2))
             ->method('handle')
-            ->will($this->throwException($secondWhileHandleException))
+            ->with($secondWhileHandleException)
         ;
 
         $secondCallbackWithException = $this->getMock('stdClass', array('handle'));
         $secondCallbackWithException
             ->expects($this->at(0))
             ->method('handle')
+            ->with($handlingException)
             ->will($this->throwException($secondWhileHandleException))
         ;
         $secondCallbackWithException
             ->expects($this->at(1))
             ->method('handle')
-            ->will($this->throwException($firstWhileHandleException))
+            ->with($firstWhileHandleException)
         ;
         $secondCallbackWithException
             ->expects($this->at(2))
             ->method('handle')
-            ->will($this->throwException($secondWhileHandleException))
+            ->with($secondWhileHandleException)
         ;
 
-        $thirdCallback = $this->getMock('stdClass', array('handle'));
-        $thirdCallback
+        $thirdSuccessCallback = $this->getMock('stdClass', array('handle'));
+        $thirdSuccessCallback
             ->expects($this->at(0))
             ->method('handle')
+            ->with($handlingException)
         ;
-        $thirdCallback
+        $secondCallbackWithException
             ->expects($this->at(1))
             ->method('handle')
-            ->will($this->throwException($firstWhileHandleException))
+            ->with($firstWhileHandleException)
         ;
-        $thirdCallback
+        $secondCallbackWithException
             ->expects($this->at(2))
             ->method('handle')
-            ->will($this->throwException($secondWhileHandleException))
+            ->with($secondWhileHandleException)
         ;
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback(array($firstCallbackWithException, 'handle'));
         $catcher->registerCallback(array($secondCallbackWithException, 'handle'));
-        $catcher->registerCallback(array($thirdCallback, 'handle'));
+        $catcher->registerCallback(array($thirdSuccessCallback, 'handle'));
 
         $catcher->handleException($handlingException);
     }
@@ -407,20 +411,26 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
 
         $callbackWithException = $this->getMock('stdClass', array('handle'));
         $callbackWithException
-            ->expects($this->exactly(2))
+            ->expects($this->any())
             ->method('handle')
             ->will($this->throwException($firstWhileHandleException))
         ;
 
-        $secondCallback = $this->getMock('stdClass', array('handle'));
-        $secondCallback
-            ->expects($this->exactly(2))
+        $successCallback = $this->getMock('stdClass', array('handle'));
+        $successCallback
+            ->expects($this->at(0))
             ->method('handle')
+            ->with($handlingException)
+        ;
+        $successCallback
+            ->expects($this->at(1))
+            ->method('handle')
+            ->with($firstWhileHandleException)
         ;
 
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback(array($callbackWithException, 'handle'));
-        $catcher->registerCallback(array($secondCallback, 'handle'));
+        $catcher->registerCallback(array($successCallback, 'handle'));
 
         $catcher->handleException($handlingException);
     }
