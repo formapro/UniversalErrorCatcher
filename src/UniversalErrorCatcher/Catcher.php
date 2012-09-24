@@ -124,8 +124,8 @@ class UniversalErrorCatcher_Catcher
             }
         }
 
-        foreach ($this->callbacks as $callback) {
-            foreach ($caughtExceptions as $caughtException) {
+        foreach ($caughtExceptions as $caughtException) {
+            foreach ($this->callbacks as $callback) {
                 try {
                     call_user_func_array($callback, array($caughtException));
                 } catch (Exception $e) {
