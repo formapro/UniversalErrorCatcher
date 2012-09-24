@@ -115,8 +115,23 @@ class UniversalErrorCatcher_Catcher
      */
     public function handleException(Exception $e)
     {
+        $caughtExceptions = array();
         foreach ($this->callbacks as $callback) {
-            call_user_func_array($callback, array($e));
+            try {
+                call_user_func_array($callback, array($e));
+            } catch (Exception $caughtException) {
+                $caughtExceptions[] = $caughtException;
+            }
+        }
+
+        foreach ($caughtExceptions as $caughtException) {
+            foreach ($this->callbacks as $callback) {
+                try {
+                    call_user_func_array($callback, array($caughtException));
+                } catch (Exception $e) {
+                    // we did our best so there is nothing left we can do.  
+                }
+            }
         }
     }
 
