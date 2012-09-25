@@ -306,8 +306,8 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldCatchAllExceptionHappenedWhileHandlingException()
     {
-        $exceptionWhileHandleException = new \Exception('The exception that thrown while handle exception');
-        $handlingException = new \Exception('The exception that has been been processing');
+        $exceptionWhileHandleException = new Exception('The exception that thrown while handle exception');
+        $handlingException = new Exception('The exception that has been been processing');
 
         $callbackWithException = $this->getMock('stdClass', array('handle'));
         $callbackWithException
@@ -336,9 +336,9 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldTryHandleAllExceptionsCoughtWhileHandlingException()
     {
-        $firstWhileHandleException = new \Exception('The first exception that thrown while handle the exception');
-        $secondWhileHandleException = new \Exception('The second exception that thrown while handle the exception');
-        $handlingException = new \Exception('The exception that must be handled');
+        $firstWhileHandleException = new Exception('The first exception that thrown while handle the exception');
+        $secondWhileHandleException = new Exception('The second exception that thrown while handle the exception');
+        $handlingException = new Exception('The exception that must be handled');
 
         $firstCallbackWithException = $this->getMock('stdClass', array('handle'));
         $secondCallbackWithException = $this->getMock('stdClass', array('handle'));
@@ -410,8 +410,8 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
      */
     public function shouldIgnoreAllExceptionsThrownWhileHandlingCaughtExceptions()
     {
-        $firstWhileHandleException = new \Exception('The exception that thrown while handle the exception');
-        $handlingException = new \Exception('The exception that must be handled');
+        $firstWhileHandleException = new Exception('The exception that thrown while handle the exception');
+        $handlingException = new Exception('The exception that must be handled');
 
         // The callback will throw exception every time
         $callbackWithException = $this->getMock('stdClass', array('handle'));
