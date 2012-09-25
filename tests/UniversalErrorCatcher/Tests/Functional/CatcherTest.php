@@ -25,7 +25,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
         return array(
             array('scripts/Notice.php'),
             array('scripts/Warning.php'),
-            array(static::$scriptSuppressedWarning)
+            array(self::$scriptSuppressedWarning)
         );
     }
 
@@ -48,10 +48,10 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
     public static function provideAllBuggyScripts()
     {
         return array_merge(
-            static::provideScriptsWithRecoverableErrors(),
-            static::proviceScriptsWithFatalErrors(),
+            self::provideScriptsWithRecoverableErrors(),
+            self::proviceScriptsWithFatalErrors(),
             array(
-                array(static::$scriptErrorInToString)
+                array(self::$scriptErrorInToString)
             )
         );
     }
@@ -73,7 +73,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
      */
     public function shouldNotThrowErrorWithEnabledTrhowRecoverableErrorsIfInToStringErrorOccurred()
     {
-        $r = $this->exec("php RunnerThrowErrors.php " . static::$scriptErrorInToString . " 2> /dev/null");
+        $r = $this->exec("php RunnerThrowErrors.php " . self::$scriptErrorInToString . " 2> /dev/null");
 
         $this->assertExecResultContainsError($r);
     }
@@ -95,7 +95,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
      */
     public function shouldCatchErrorButNotThrowErrorWithEnabledThrowRecoverableErrorsAndDisabledThrowSuppressErrors()
     {
-        $r = $this->exec("php RunnerDoesNotThrowSuppressedErrors.php " . static::$scriptSuppressedWarning . " 2> /dev/null");
+        $r = $this->exec("php RunnerDoesNotThrowSuppressedErrors.php " . self::$scriptSuppressedWarning . " 2> /dev/null");
 
         $this->assertExecResultContainsError($r);
     }
@@ -105,7 +105,7 @@ class UniversalErrorCatcher_Tests_Functional_CatcherTest extends PHPUnit_Framewo
      */
     public function shouldThrowErrorOnRecoverableErrorsWithEnabledThrowRecoverableErrorsAndEnabledThrowSuppressErrors()
     {
-        $r = $this->exec("php RunnerThrowErrors.php " . static::$scriptSuppressedWarning . " 2> /dev/null");
+        $r = $this->exec("php RunnerThrowErrors.php " . self::$scriptSuppressedWarning . " 2> /dev/null");
 
         $this->assertSuppressedErrorWasThrown($r);
     }
