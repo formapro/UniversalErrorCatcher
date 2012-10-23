@@ -1,6 +1,6 @@
 <?php
 
-class FatalErrorException extends ErrorException
+class FatalErrorException extends UniversalErrorCatcher_ErrorException
 {
     /**
      * @return array
