@@ -1,5 +1,5 @@
 <?php
 
-class SuppressedErrorException extends ErrorException
+class SuppressedErrorException extends UniversalErrorCatcher_ErrorException
 {
 }

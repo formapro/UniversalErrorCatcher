@@ -10,7 +10,8 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         'errstr' => 'foo',
         'errno' => 10,
         'errfile' => 'bar.php',
-        'errline' => 100
+        'errline' => 100,
+        'errcontext' => array(),
     );
 
     protected $invalidFatalData = array(
@@ -162,7 +163,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $catcher = new UniversalErrorCatcher_Catcher();
         $catcher->registerCallback(array($callback, 'handle'));
 
-        $catcher->handleError($errorData['errno'], $errorData['errstr'], $errorData['errfile'], $errorData['errline']);
+        $catcher->handleError($errorData['errno'], $errorData['errstr'], $errorData['errfile'], $errorData['errline'], $errorData['errcontext']);
     }
 
     public function callbackForShouldPassErrorExceptionToCallbackOnErrorHandling($actualException)
@@ -174,6 +175,7 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($errorData['errno'], $actualException->getSeverity());
         $this->assertEquals($errorData['errfile'], $actualException->getFile());
         $this->assertEquals($errorData['errline'], $actualException->getLine());
+        $this->assertEquals($errorData['errcontext'], $actualException->getContext());
     }
 
     /**
@@ -279,7 +281,8 @@ class UniversalErrorCatcher_Tests_CatcherTest extends PHPUnit_Framework_TestCase
 
         $catcher->setThrowRecoverableErrors(true);
 
-        $catcher->handleError(E_NOTICE, 'A recoverable error has happened', __FILE__, __LINE__);
+        $context = get_defined_vars();
+        $catcher->handleError(E_NOTICE, 'A recoverable error has happened', __FILE__, __LINE__, $context);
     }
 
     /**

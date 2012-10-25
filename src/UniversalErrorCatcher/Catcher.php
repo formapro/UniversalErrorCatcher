@@ -129,7 +129,7 @@ class UniversalErrorCatcher_Catcher
                 try {
                     call_user_func_array($callback, array($caughtException));
                 } catch (Exception $e) {
-                    // we did our best so there is nothing left we can do.  
+                    // we did our best so there is nothing left we can do.
                 }
             }
         }
@@ -142,9 +142,11 @@ class UniversalErrorCatcher_Catcher
      * @param string $errfile
      * @param string $errline
      *
-     * @return ErrorException
+     * @throws UniversalErrorCatcher_ErrorException
+     *
+     * @return bool
      */
-    public function handleError($errno, $errstr, $errfile, $errline)
+    public function handleError($errno, $errstr, $errfile, $errline, $errcontext)
     {
         $throwError = $this->throwRecoverableErrors;
         if ($this->isSuppressedError() && false == $this->throwSuppressedErrors) {
@@ -164,8 +166,9 @@ class UniversalErrorCatcher_Catcher
 
         $exception = $this->isSuppressedError()
             ? new SuppressedErrorException($errstr, 0, $errno, $errfile, $errline)
-            : new ErrorException($errstr, 0, $errno, $errfile, $errline)
+            : new UniversalErrorCatcher_ErrorException($errstr, 0, $errno, $errfile, $errline)
         ;
+        $exception->setContext($errcontext);
 
         if ($throwError) {
             throw $exception;
